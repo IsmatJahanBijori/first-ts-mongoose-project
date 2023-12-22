@@ -1,5 +1,5 @@
 // import { Request, Response } from "express";
-import { StudentModel } from '../student.model';
+import { StudentModel } from './student.model';
 import { Student } from './student.interface';
 
 const createStudentIntoDB = async (student: Student) => {
