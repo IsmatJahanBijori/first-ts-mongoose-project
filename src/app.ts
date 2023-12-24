@@ -27,3 +27,4 @@ export default app;
 // controller  (async, await, try--catch)--> service function(model await, find, update etc..),
 // service--> model er upore query chalaye db theke data ene controller k dibe,
 // controller res hisebe sei data client k dibe
+//req->cli->rou->con->ser->mod->db->con->res->cli
