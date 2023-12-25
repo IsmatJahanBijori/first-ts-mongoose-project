@@ -143,7 +143,16 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     enum: ['active', 'blocked'],
     default: 'active'
   },
-});
+  isDeleted: {
+    type: Boolean,
+    default: false
+  }
+},
+  {
+    toJSON: {
+      virtuals: true
+    }
+  });
 
 //creating a custom static method
 //c.
@@ -162,18 +171,54 @@ studentSchema.statics.isUserExists = async function (id: string) {
 
 
 
+//virtual
+studentSchema.virtual("fullName").get(function () {
+  return this.name.firstName + " " + this.name.middleName + " " + this.name.lastName
+})
+
 // pre save middleware/ hook : will work on create()  save()
 studentSchema.pre('save', async function (next) {
   // console.log(this, 'pre hook : we will save  data');
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this; // doc
   // hashing password and save into DB
+  // console.log(this, "pre")
   user.password = await bcrypt.hash(
     user.password,
     Number(config.bcrypt_salt_round),
   );
   next();
 });
+
+studentSchema.post('save', async function (doc, next) {
+  doc.password = "******************"
+  // console.log(doc, "post")
+  next();
+});
+
+
+//Query middleware
+studentSchema.pre("find", function (next) {
+  // console.log(this)
+  this.find({ isDeleted: { $ne: true } })    //jkhane isDeleted property nay, seta pathay dao
+  next()
+})
+
+//findone
+studentSchema.pre("findOne", function (next) {
+  // console.log(this)
+  this.find({ isDeleted: { $ne: true } })    //jkhane isDeleted property nay, seta pathay dao
+  next()
+})
+
+//pipleline
+studentSchema.pre("aggregate", function (next) {
+  // console.log(this)
+  // console.log(this.pipeline())
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } })
+  next()
+})
+
 
 //vi.
 // 3. create a model
